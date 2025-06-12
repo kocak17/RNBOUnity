@@ -21,11 +21,3 @@ MonoBehaviour:
     min: 0
     max: 1
     defaultValue: 1
-  - paramId: /signals/freq
-    min: 0
-    max: 1
-    defaultValue: 0
-  - paramId: /signals/gain
-    min: 0
-    max: 1
-    defaultValue: 0
