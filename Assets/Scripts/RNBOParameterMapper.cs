@@ -1,45 +1,63 @@
 using UnityEngine;
+using System;
+using System.Collections.Generic;
 
+[RequireComponent(typeof(RNBOgenHelper))]
 public class RNBOParameterMapper : MonoBehaviour
 {
-    public RNBOgenHelper rnboHelper;
-    private RNBOgenHandle rnboPlugin;
+    [Tooltip("The parameter list asset generated from RNBO description.json")]
+    public RNBOParameterList parameterList;
 
-    [Tooltip("ID of the parameter to control (e.g. 'freq')")]
-    public string rnboParameterID;
+    [Tooltip("Index of the parameter in the list to bind")]
+    public int parameterIndex;
 
-    [Tooltip("The game value that will be mapped (e.g. speed, health etc.)")]
-    public float sourceValue;
+    [Tooltip("Value to be mapped to the parameter (e.g., speed, health)")]
+    public float gameplayValue;
 
-    public float minValue = 0f;
-    public float maxValue = 1f;
+    [Tooltip("Scale gameplay value into parameter range")]
+    public bool normalizeValue = true;
 
-    private int? parameterIndex = null;
+    private RNBOgenHandle plugin;
+    private int? paramIndex;
 
     void Start()
     {
-        if (rnboHelper == null)
+        var helper = GetComponent<RNBOgenHelper>();
+        plugin = helper.Plugin;
+
+        if (parameterList == null || parameterList.parameters.Length == 0)
         {
-            rnboHelper = RNBOgenHelper.FindById(1); // or 0 depending on your setup
+            Debug.LogError("Parameter list not assigned or empty.");
+            return;
         }
 
-        if (rnboHelper != null)
+        if (parameterIndex < 0 || parameterIndex >= parameterList.parameters.Length)
         {
-            rnboPlugin = rnboHelper.Plugin;
-            parameterIndex = RNBOgenHandle.GetParamIndexById(rnboParameterID);
-            Debug.Log($"Parameter index for '{rnboParameterID}': {parameterIndex}");
+            Debug.LogError("Invalid parameter index.");
+            return;
         }
-        else
+
+        string paramId = parameterList.parameters[parameterIndex].paramId;
+        paramIndex = RNBOgenHandle.GetParamIndexById(paramId);
+
+        if (paramIndex == null)
         {
-            Debug.LogError("RNBO Helper not found!");
+            Debug.LogError($"Parameter ID '{paramId}' not found in RNBO plugin.");
         }
     }
 
     void Update()
     {
-        if (rnboPlugin == null || parameterIndex == null) return;
+        if (plugin == null || paramIndex == null) return;
 
-        float clamped = Mathf.Clamp(sourceValue, minValue, maxValue);
-        rnboPlugin.SetParamValue((int)parameterIndex, clamped);
+        var paramData = parameterList.parameters[parameterIndex];
+        float valueToSend = gameplayValue;
+
+        if (normalizeValue)
+        {
+            valueToSend = Mathf.Clamp(valueToSend, paramData.min, paramData.max);
+        }
+
+        plugin.SetParamValue((int)paramIndex, valueToSend);
     }
 }
