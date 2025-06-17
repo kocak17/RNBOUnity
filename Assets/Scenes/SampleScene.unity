@@ -233,7 +233,6 @@ GameObject:
   - component: {fileID: 715490222}
   - component: {fileID: 715490223}
   - component: {fileID: 715490224}
-  - component: {fileID: 715490225}
   - component: {fileID: 715490227}
   - component: {fileID: 715490226}
   m_Layer: 0
@@ -467,22 +466,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &715490225
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 715490216}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef43589b98c27477d928fb788cd8d628, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parameterList: {fileID: 11400000, guid: e782e15b2915b433bbebcae1c347a70f, type: 2}
-  parameterIndex: 1
-  gameplayValue: 100
-  normalizeValue: 1
 --- !u!114 &715490226
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -499,8 +482,8 @@ MonoBehaviour:
   parameterIndex: 0
   targetScript: {fileID: 715490222}
   targetFieldOrProperty: frequency
-  normalizeValue: 1
-  updateEveryFrame: 1
+  inputMinField: minSpeed
+  inputMaxField: maxSpeed
 --- !u!114 &715490227
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -10,17 +10,20 @@ public class RNBOParameterBinder : MonoBehaviour
     public MonoBehaviour targetScript;
     public string targetFieldOrProperty;
 
-    public bool normalizeValue = true;
-    public bool updateEveryFrame = true;
+    public string inputMinField = "";
+    public string inputMaxField = "";
 
     private RNBOgenHandle plugin;
     private FieldInfo field;
     private PropertyInfo property;
     private RNBOParameterList.Parameter param;
 
+    private float inputMin = 0f;
+    private float inputMax = 1f;
+
     void Start()
     {
-        var helper = GetComponent<RNBOgenHelper>();
+        var helper = RNBOgenHelper.FindById(0);
         plugin = helper.Plugin;
 
         if (parameterList == null || parameterIndex < 0 || parameterIndex >= parameterList.parameters.Length)
@@ -41,18 +44,19 @@ public class RNBOParameterBinder : MonoBehaviour
                 Debug.LogError("Could not find the field or property on target script.");
             }
         }
+
+        AutoDetectInputRange();
     }
 
     void Update()
     {
-        if (updateEveryFrame)
-        {
-            ApplyValue();
-        }
+        ApplyValue();
     }
 
     public void ApplyValue()
     {
+        Debug.Log(plugin);
+        Debug.Log(param);
         if (plugin == null || param == null) return;
 
         float value = 0f;
@@ -74,19 +78,38 @@ public class RNBOParameterBinder : MonoBehaviour
         int? index = RNBOgenHandle.GetParamIndexById(param.paramId);
         if (!index.HasValue)
         {
-            Debug.LogError($"Could not find parameter index for ID '{param.paramId}'");
+            Debug.LogWarning($"Could not find index for parameter ID {param.paramId}");
             return;
         }
 
-        if (normalizeValue)
+        // Clamp input value first for safety
+        value = Mathf.Clamp(value, inputMin, inputMax);
+
+        // Normalize based on detected or manually set range
+        float t = Mathf.InverseLerp(inputMin, inputMax, value);
+        // Map to parameter's defined min/max
+        float mapped = Mathf.Lerp(param.min, param.max, t);
+        Debug.Log(mapped);
+        plugin.SetParamValue(index.Value, mapped);
+    }
+
+    private void AutoDetectInputRange()
+    {
+        if (targetScript == null) return;
+
+        FieldInfo minField = !string.IsNullOrEmpty(inputMinField) ? targetScript.GetType().GetField(inputMinField) : null;
+        FieldInfo maxField = !string.IsNullOrEmpty(inputMaxField) ? targetScript.GetType().GetField(inputMaxField) : null;
+    
+    
+        if (minField != null && maxField != null)
         {
-            value = Mathf.InverseLerp(param.min, param.max, value);
-            plugin.SetParamValueNormalized(index.Value, value);
+            inputMin = (float)minField.GetValue(targetScript);
+            inputMax = (float)maxField.GetValue(targetScript);
+            Debug.Log($"Auto-detected input range: {inputMin} to {inputMax}");
         }
         else
         {
-            plugin.SetParamValue(index.Value, value);
+            Debug.Log("Could not auto-detect input range. Defaulting to 0–1. You can manually override in inspector.");
         }
-
     }
 }

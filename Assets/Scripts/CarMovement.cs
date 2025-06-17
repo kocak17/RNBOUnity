@@ -6,25 +6,26 @@ public class CarMovement : MonoBehaviour
     public float speed = 10f;
 
     public float acceleration = 5f;
-    private float maxSpeed = 50f;
+    public float minSpeed = 0f;
+    public float maxSpeed = 50f;
     private float usedSpeed = 10f;
 
 
-    private RNBOgenHelper helper;
-    private RNBOgenHandle plugin;
-    const int pluginId = 0; // Assuming the plugin ID is 0, change as needed
-    readonly System.Int32 freqParam = (int)RNBOgenHandle.GetParamIndexById("freq");
+    // private RNBOgenHelper helper;
+    // private RNBOgenHandle plugin;
+    // const int pluginId = 0; // Assuming the plugin ID is 0, change as needed
+    // readonly System.Int32 freqParam = (int)RNBOgenHandle.GetParamIndexById("freq");
 
     public float frequency = 100f;
     // Start is called before the first frame update
     void Start()
     {
-        helper = RNBOgenHelper.FindById(pluginId);
-        plugin = helper.Plugin;
+        // helper = RNBOgenHelper.FindById(pluginId);
+        // plugin = helper.Plugin;
 
-        Debug.Log("Plugin: " + plugin);
-        Debug.Log("param: " + freqParam);
-        plugin.SetParamValue(freqParam, frequency);
+        // Debug.Log("Plugin: " + plugin);
+        // Debug.Log("param: " + freqParam);
+        // plugin.SetParamValue(freqParam, frequency);
     }
 
     // Update is called once per frame
@@ -49,6 +50,8 @@ public class CarMovement : MonoBehaviour
         {
             usedSpeed = speed;
         }
+
+        frequency = usedSpeed; // or something more meaningful
     }
     
     void FixedUpdate()
